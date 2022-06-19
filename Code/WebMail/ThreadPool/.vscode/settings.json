@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "vector": "cpp",
+        "thread": "cpp",
+        "functional": "cpp",
+        "condition_variable": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "ranges": "cpp",
+        "*.tcc": "cpp",
+        "ostream": "cpp",
+        "iostream": "cpp"
+    },
+    "code-runner.executorMap": {
+        "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "cpp": "cd $dir && g++ $fileName -o $fileNameWithoutExt -lpthread && $dir$fileNameWithoutExt",
+    }
+}
