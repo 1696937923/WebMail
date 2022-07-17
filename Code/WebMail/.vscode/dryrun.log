@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/zxx/桌面/Code/WebMail'
+make: Leaving directory '/home/zxx/桌面/Code/WebMail'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

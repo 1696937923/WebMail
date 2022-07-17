@@ -21,7 +21,7 @@ public:
     void stop();
 
     template <class T, class... Args>
-    void addTask(T &&, Args &&...);
+    auto addTask(T &&, Args &&...);
 
 private:
     void threadLoop();
@@ -53,6 +53,7 @@ void ThreadPool::start()
     {
         //为进程绑定threadLoop函数
         thread *th = new thread(bind(&ThreadPool::threadLoop, this));
+        // th->detach();
         thread_pool.push_back(th);
     }
 }
@@ -82,16 +83,18 @@ void ThreadPool::threadLoop()
 }
 
 template <class T, class... Args>
-void ThreadPool::addTask(T &&t, Args &&...args)
+auto ThreadPool::addTask(T &&t, Args &&...args)
 {
-    // using RetType = decltype(t(args...));
+    using RetType = decltype(t(args...));
     auto task = std::make_shared<std::packaged_task<int()>>(
         std::bind(std::forward<T>(t), std::forward<Args>(args)...));
 
+    future<RetType> future = task->get_future();
     unique_lock<mutex> lock(m_mutex);
     tasks_queue.emplace([task]()
                         { (*task)(); });
     m_cond.notify_one();
+    return future;
 }
 
 Task ThreadPool::take_task()
@@ -110,24 +113,32 @@ Task ThreadPool::take_task()
     return task;
 }
 
-// void MyFunc(int a, int b)
-// {
-//     // cout << a << endl;
-//     // cout << " at thread[" << this_thread::get_id() << "] output " << endl;
-// }
+int MyFunc(int a)
+{
+    // cout << a << endl;
+    cout << "PP " << a << " pp" << endl;
+    sleep(1);
+    return 6;
+}
 
 // int main()
 // {
+
 //     ThreadPool tp;
 //     tp.start();
+//     // time_t timer;
+//     // clock_t start = time();
 //     //这里只添加四次任务，因此任务队列实际大小为4
-//     for (int i = 0; i < 4; ++i)
+//     for (int i = 0; i < 5; ++i)
 //     {
-//         tp.addTask(&MyFunc, 3, i);
+//         future<int> f = tp.addTask(MyFunc, i);
 //     }
+//     // sleep(1);
+//     // clock_t end = clock_t();
+//     // cout << end - start << endl;
 //     sleep(3);
-//     // tp.addTask(MyFunc);
-//     sleep(3);
+
+//     // cout << f.get() << endl;
 //     cout << "exit(0);" << endl;
 //     return 0;
 // }
