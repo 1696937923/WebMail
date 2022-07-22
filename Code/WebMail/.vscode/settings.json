@@ -1,7 +1,7 @@
 {
     "code-runner.executorMap": {
         "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
-        "cpp": "cd $dir && g++ ../ProtoBuffer/msg.pb.cc $fileName -w -o $fileNameWithoutExt -lprotobuf -lmysqlclient -lpthread -lhiredis -lboost_thread -levent -lboost_serialization -lboost_system -DBOOST_BIND_GLOBAL_PLACEHOLDERS && $dir$fileNameWithoutExt",
+        "cpp": "cd $dir && g++ ../ProtoBuffer/msg.pb.cc $fileName -w -o $fileNameWithoutExt -lcrypto -lprotobuf -lmysqlclient -lpthread -lhiredis -lboost_thread -levent -lboost_serialization -lboost_system -DBOOST_BIND_GLOBAL_PLACEHOLDERS && $dir$fileNameWithoutExt",
     },
     "files.associations": {
         "iostream": "cpp",
@@ -76,6 +76,7 @@
         "strstream": "cpp",
         "cfenv": "cpp",
         "unordered_set": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "regex": "cpp"
     }
 }

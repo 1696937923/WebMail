@@ -1,44 +1,8 @@
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <thread>
-#include <functional>
-#include <mutex>
-#include <condition_variable>
-#include <unistd.h>
-#include <future>
-#include <stdexcept>
-
-using namespace std;
-typedef function<void()> Task;
-
-class ThreadPool
-{
-public:
-    ThreadPool(int threads_size = 5);
-    ~ThreadPool();
-    void start();
-    void stop();
-
-    template <class T, class... Args>
-    auto addTask(T &&, Args &&...);
-
-private:
-    void threadLoop();
-    Task take_task();
-    int threads_size;
-    bool running;
-    mutex m_mutex;
-    condition_variable m_cond; //条件变量
-
-    vector<thread *> thread_pool; //线程池
-    queue<Task> tasks_queue;      //任务队列
-};
+#include "ThreadPool.h"
 
 ThreadPool::ThreadPool(int threads_size)
 {
     this->threads_size = threads_size;
-    running = true;
 }
 
 ThreadPool::~ThreadPool()
@@ -48,12 +12,12 @@ ThreadPool::~ThreadPool()
 
 void ThreadPool::start()
 {
+    running = true;
     thread_pool.reserve(threads_size);
     for (int i = 0; i < threads_size; i++)
     {
         //为进程绑定threadLoop函数
-        thread *th = new thread(bind(&ThreadPool::threadLoop, this));
-        // th->detach();
+        std::thread *th = new std::thread(std::bind(&ThreadPool::threadLoop, this));
         thread_pool.push_back(th);
     }
 }
@@ -78,48 +42,58 @@ void ThreadPool::threadLoop()
     {
         Task task = take_task();
         if (task)
+        {
+            //执行任务
             task();
+        }
     }
 }
 
 template <class T, class... Args>
 auto ThreadPool::addTask(T &&t, Args &&...args)
 {
-    using RetType = decltype(t(args...));
+    using RetType = decltype(t(args...)); //构造一个返回类型，参数为传入的args，返回值为T
     auto task = std::make_shared<std::packaged_task<int()>>(
-        std::bind(std::forward<T>(t), std::forward<Args>(args)...));
+        std::bind(std::forward<T>(t), std::forward<Args>(args)...)); //构造一个task
 
-    future<RetType> future = task->get_future();
-    unique_lock<mutex> lock(m_mutex);
+    std::future<RetType> future = task->get_future();
+
+    std::unique_lock<std::mutex> lock(m_mutex);
     tasks_queue.emplace([task]()
                         { (*task)(); });
-    m_cond.notify_one();
+
+    m_cond.notify_one(); //唤醒一个阻塞的线程
     return future;
 }
 
 Task ThreadPool::take_task()
 {
-    unique_lock<mutex> lock(m_mutex);
+    //进行加锁
+    std::unique_lock<std::mutex> lock(m_mutex);
     while (tasks_queue.empty() && running)
     {
+        //任务队列为空，则阻塞
         m_cond.wait(lock);
     }
+
     Task task;
     if (!tasks_queue.empty() && running)
     {
+        //从队列中取出一个任务
         task = tasks_queue.front();
         tasks_queue.pop();
     }
+
     return task;
 }
 
-int MyFunc(int a)
-{
-    // cout << a << endl;
-    cout << "PP " << a << " pp" << endl;
-    sleep(1);
-    return 6;
-}
+// int MyFunc(int a)
+// {
+//     // cout << a << endl;
+//     cout << "PP " << a << " pp" << endl;
+//     sleep(1);
+//     return 6;
+// }
 
 // int main()
 // {

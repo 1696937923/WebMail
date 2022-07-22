@@ -1,79 +1,4 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <mysql/mysql.h>
-#include <string.h>
-#include <stdlib.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <fcntl.h>
-#include <hiredis/hiredis.h>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-
-#include "../ThreadPool/ThreadPool.cpp"
-#include "../Redis/Redis.cpp"
-// #include "../Serialize/Serialize.cpp"
-// #include <threads.h>
-using namespace std;
-// 1.用户刚登录时，先获取消息队列中未读的消息数并返回给用户，然后订阅特定频道来实时监听用户的新邮件，
-// 有新邮件时便通知用户，当用户下线时，便取消对频道的订阅
-// 2.完成剩下功能
-// 3.加锁
-// 4.加密
-
-#define BUFFERSIZE 1024
-#define EPOLLSIZE 512
-const char *Host = "127.0.0.1";
-const char *User = "root";
-const char *Passwd = "123456";
-const char *Db_Name = "WebMail";
-const unsigned int Db_Port = 3306;
-const uint16_t Sock_Port = 6789;
-const unsigned int Redis_Port = 6379;
-
-struct LOGIN_INFO;    //登录信息
-struct REGISTER_INFO; //注册信息
-struct QUERY_INFO;    //查询邮件信息
-struct PULL_INFO;     //拉取邮件信息
-struct BACK_INFO;     //返回信息
-struct EMAIL;         //邮件信息
-
-class WebServer
-{
-public:
-    WebServer();
-    ~WebServer();
-    void Run(); //启动服务器
-
-private:
-    MYSQL mysql;
-    Redis redis;
-    int socket_fd;
-    ThreadPool tp;
-    Serialize se;
-
-    void Db_Connect();    //连接mysql数据库
-    void Start_Service(); //开启服务器监听
-
-    void Send(int, int, string);
-    template <class T>
-    void Recv(int, char *, T &);
-
-    void Epoll_Ctl(int, int, int, int);
-    void Handle_Events(int, struct epoll_event *, int, int);
-    void Do_Accept(int, int);
-    void Do_Deal(int, int, char *);
-
-    static int Logout();
-    static int Login(struct LOGIN_INFO, MYSQL);
-    static int Register(struct REGISTER_INFO, MYSQL);
-    static int Send_Email(struct EMAIL, MYSQL, Redis);
-    static int Query_Email(struct QUERY_INFO, MYSQL);
-    static int Pull_Email(struct PULL_INFO, MYSQL);
-    static void ReturnMessage(Redis, const char *, const char *); //监听用户新消息,并且将消息发送给客户端
-};
+#include "WebServer.h"
 
 struct REGISTER_INFO
 {
@@ -135,10 +60,10 @@ void WebServer::Db_Connect()
     mysql_init(&mysql);
     if (!mysql_real_connect(&mysql, Host, User, Passwd, Db_Name, Db_Port, NULL, 0))
     {
-        cout << "(INFO)Db: Connect error! -> " << mysql_error(&mysql) << endl;
+        std::cout << "(INFO)Db: Connect error! -> " << mysql_error(&mysql) << std::endl;
         return;
     }
-    cout << "(INFO)Db: Connect successed!" << endl;
+    std::cout << "(INFO)Db: Connect successed!" << std::endl;
 }
 
 void WebServer::Start_Service()
@@ -154,11 +79,11 @@ void WebServer::Start_Service()
 
     if (bind(socket_fd, (struct sockaddr *)&s_addr, sizeof(sockaddr_in)) < 0)
     {
-        cout << "(INFO)Server: Bind error!" << endl;
+        std::cout << "(INFO)Server: Bind error!" << std::endl;
         return;
     }
     listen(socket_fd, 40);
-    cout << "(INFO)Server: Waiting for client!" << endl;
+    std::cout << "(INFO)Server: Waiting for client!" << std::endl;
 
     int epoll_fd = epoll_create(EPOLLSIZE);                            // 1.初始化
     fcntl(socket_fd, F_SETFL, fcntl(socket_fd, F_GETFL) | O_NONBLOCK); //设置为非阻塞
@@ -169,20 +94,21 @@ void WebServer::Start_Service()
         int event_cnt = epoll_wait(epoll_fd, events, EPOLLSIZE, -1); // 3.返回有消息的事件数量，且事件存放在events中
         if (event_cnt < 0)
         {
-            cout << "(INFO)Epoll: epoll_wait error!" << endl;
+            std::cout << "(INFO)Epoll: epoll_wait error!" << std::endl;
             return;
         }
+
         Handle_Events(epoll_fd, events, event_cnt, socket_fd);
     }
 }
 
-void WebServer::Send(int fd, int code, string info)
+void WebServer::Send(int fd, int code, std::string info)
 {
     struct BACK_INFO back_info;
     back_info.code = code;
     strncpy(back_info.info, (char *)info.c_str(), info.length() + 1);
     if (send(fd, &back_info, sizeof(BACK_INFO), 0) < 0)
-        cout << "(INFO)Server: Send error!" << endl;
+        std::cout << "(INFO)Server: Send error!" << std::endl;
 }
 
 template <class T>
@@ -193,25 +119,24 @@ void WebServer::Recv(int fd, char *buffer, T &info)
     memcpy(&info, buffer, sizeof(T));
 }
 
-void WebServer::ReturnMessage(Redis redis, const char *user_email, const char *email_id)
+void WebServer::ReturnMessage(Redis redis, const char *user_email, char *email_id)
 {
-    cout << "-----" << user_email << " recv an email----- " << email_id << endl;
+    std::cout << "-----" << user_email << " recv an email----- " << email_id << std::endl;
     MyStruct::SESSION session = redis.GetSession(user_email);
 
-    cout << session.login_flag() << "--" << session.socket_fd() << endl;
     if (session.login_flag() == 1)
     {
         int fd = session.socket_fd();
         int ret = send(fd, email_id, sizeof(email_id), 0);
         if (ret < 0)
         {
-            cout << "(INFO)Server: Send email error!" << endl;
+            std::cout << "(INFO)Server: Send email error!" << std::endl;
             return;
         }
     }
     else
     {
-        cout << "(INFO)ReturnEmail: User '" << user_email << "' not login!" << endl;
+        std::cout << "(INFO)ReturnEmail: User '" << user_email << "' not login!" << std::endl;
         return;
     }
 }
@@ -236,16 +161,21 @@ void WebServer::Do_Accept(int epoll_fd, int socket_fd)
     socklen_t len = sizeof(sockaddr_in);
 
     int accept_fd = accept(socket_fd, (struct sockaddr *)&c_addr, &len);
-    cout << inet_ntoa(c_addr.sin_addr) << ":" << c_addr.sin_port << " is connected!!" << endl;
+    std::cout << inet_ntoa(c_addr.sin_addr) << ":" << c_addr.sin_port << " is connected!!" << std::endl;
 
-    Send(accept_fd, 1, "Back: Connect OK!");
+    smtp.ConnectReturn(accept_fd);
+
+    // Send(accept_fd, 1, "Back: Connect OK!");
     Epoll_Ctl(epoll_fd, accept_fd, EPOLL_CTL_ADD, EPOLLIN);
 }
 
 void WebServer::Epoll_Ctl(int epoll_fd, int fd, int op, int dir)
 {
     if (op == EPOLL_CTL_DEL)
-        cout << "(INFO)Server: A Client close!" << endl;
+    {
+        std::cout << "(INFO)Server: A Client close!" << std::endl;
+    }
+
     struct epoll_event ev;
     ev.data.fd = fd;
     ev.events = dir;
@@ -260,13 +190,18 @@ void WebServer::Do_Deal(int epoll_fd, int fd, char *buffer)
         Epoll_Ctl(epoll_fd, fd, EPOLL_CTL_DEL, EPOLLIN);
         return;
     }
-    if (strncmp(Msg_Tag, "Login", 5) == 0)
+    if (strncmp(Msg_Tag, "Auth Login", 11) == 0)
     {
-        Send(fd, 1, "Back: Tag Ok!");
-        struct LOGIN_INFO login_info;
-        Recv(fd, buffer, login_info);
+        // char username[32];
+        // smtp.ReturnMessage(fd, 334, "username\n");
 
-        future<int> rt = tp.addTask(Login, login_info, mysql); //分配线程池任务
+        // smtp.RecvMessage(fd, username);
+
+        // Send(fd, 1, "Back: Tag Ok!");
+        // struct LOGIN_INFO login_info;
+        // Recv(fd, buffer, login_info);
+
+        std::future<int> rt = tp.addTask(Login, login_info, mysql); //分配线程池任务
         int code = rt.get();
         if (code > 0)
         {
@@ -286,7 +221,7 @@ void WebServer::Do_Deal(int epoll_fd, int fd, char *buffer)
         struct REGISTER_INFO register_info;
         Recv(fd, buffer, register_info);
 
-        future<int> rt = tp.addTask(Register, register_info, mysql);
+        std::future<int> rt = tp.addTask(Register, register_info, mysql);
         int code = rt.get();
         if (code == 1)
             Send(fd, code, "Back: Register successed!");
@@ -300,7 +235,7 @@ void WebServer::Do_Deal(int epoll_fd, int fd, char *buffer)
         struct EMAIL email;
         Recv(fd, buffer, email);
 
-        future<int> rt = tp.addTask(Send_Email, email, mysql, redis);
+        std::future<int> rt = tp.addTask(Send_Email, email, mysql, redis);
         int code = rt.get();
         if (code == 1)
             Send(fd, code, "Back: Send Email successed!");
@@ -326,7 +261,7 @@ void WebServer::Do_Deal(int epoll_fd, int fd, char *buffer)
     else
     {
         Send(fd, -1, "Tag error!");
-        cout << "(INFO)Client: Error msg!" << endl;
+        std::cout << "(INFO)Client: Error msg!" << std::endl;
     }
 }
 
@@ -336,17 +271,18 @@ int Logout()
 
 int WebServer::Login(struct LOGIN_INFO login_info, MYSQL mysql)
 {
-    string query_sql = "select id,password from User where email = '" + (string)login_info.email + "'";
+    std::string query_sql = "select id,password from User where email = '" + (std::string)login_info.email + "'";
     mysql_query(&mysql, query_sql.c_str());
     MYSQL_RES *res = mysql_store_result(&mysql);
     MYSQL_ROW row = mysql_fetch_row(res);
     if (strcmp(row[1], login_info.password) != 0)
     {
-        cout << "(INFO)Login: Password error!" << endl;
+        std::cout << "(INFO)Login: Password error!" << std::endl;
         mysql_free_result(res);
         return -1;
     }
-    cout << "(INFO)Login: Login successed!" << endl;
+    std::cout << "(INFO)Login: Login successed!" << std::endl;
+
     int user_id = atoi(row[0]);
     mysql_free_result(res);
     return user_id;
@@ -354,53 +290,57 @@ int WebServer::Login(struct LOGIN_INFO login_info, MYSQL mysql)
 
 int WebServer::Register(struct REGISTER_INFO register_info, MYSQL mysql)
 {
-    string query_sql = "select * from User where email = '" + (string)register_info.email + "'";
+    std::string query_sql = "select * from User where email = '" + (std::string)register_info.email + "'";
     mysql_query(&mysql, query_sql.c_str());
     MYSQL_RES *res = mysql_store_result(&mysql);
     if (res->row_count > 0)
     {
-        cout << "(INFO)Register: User exists!" << endl;
+        std::cout << "(INFO)Register: User exists!" << std::endl;
         mysql_free_result(res);
         return -1;
     }
     mysql_free_result(res);
 
-    string insert_sql = "insert into User values(NULL, '" + (string)register_info.email + "','" + (string)register_info.password + "')";
+    std::string insert_sql = "insert into User values(NULL, '" + (std::string)register_info.email + "','" + (std::string)register_info.password + "')";
     if (mysql_query(&mysql, insert_sql.c_str()))
     {
-        cout << "(INFO)Register: Register error!" << endl;
+        std::cout << "(INFO)Register: Register error!" << std::endl;
         return -2;
     }
-    cout << "(INFO)Register: Register successed!" << endl;
+    std::cout << "(INFO)Register: Register successed!" << std::endl;
+
     return 1;
 }
 
 int WebServer::Send_Email(struct EMAIL email, MYSQL mysql, Redis redis)
 {
     mysql_query(&mysql, "START TRANSACTION");
-    string insert_sql = "insert into Email values(NULL, '" + (string)email.sender + "','" + (string)email.receiver +
-                        "','" + (string)email.subject + "','" + (string)email.date + "','" + (string)email.message + "')";
+    std::string insert_sql = "insert into Email values(NULL, '" + (std::string)email.sender +
+                             "','" + (std::string)email.receiver + "','" + (std::string)email.subject +
+                             "','" + (std::string)email.date + "','" + (std::string)email.message + "')";
 
     if (mysql_query(&mysql, insert_sql.c_str()))
     {
-        cout << "(INFO)Send_Email: Insert error!" << endl;
+        std::cout << "(INFO)Send_Email: Insert error!" << std::endl;
         return -2;
     }
-    cout << "DbInsert OK" << endl; //
 
-    string query_sql = "select LAST_INSERT_ID()";
+    std::string query_sql = "select LAST_INSERT_ID()";
+    char email_id[16];
     mysql_query(&mysql, query_sql.c_str());
+
     MYSQL_RES *res = mysql_store_result(&mysql);
-    char *email_id = mysql_fetch_row(res)[0];
+    char *e_id = mysql_fetch_row(res)[0];
+    strncpy(email_id, e_id, strlen(e_id) + 1);
     mysql_free_result(res);
 
     if (redis.PushEmail(email.receiver, email_id) < 0)
     {
-        cout << "(INFO)Send_Email: Send error!" << endl;
+        std::cout << "(INFO)Send_Email: Send error!" << std::endl;
         mysql_rollback(&mysql);
         return -1;
     }
-    cout << "(INFO)Send_Email: Send successed!" << endl;
+    std::cout << "(INFO)Send_Email: Send successed!" << std::endl;
 
     ReturnMessage(redis, email.receiver, email_id);
     mysql_commit(&mysql);
@@ -421,6 +361,6 @@ int main()
 {
     WebServer webserver;
     webserver.Run();
-    cout << "(INFO)Main: Exit!" << endl;
+    std::cout << "(INFO)Main: Exit!" << std::endl;
     return 0;
 }

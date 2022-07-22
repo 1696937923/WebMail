@@ -1,6 +1,4 @@
 make all --print-data-base --no-builtin-variables --no-builtin-rules --question
-make: *** No rule to make target 'all'.  Stop.
-
 # GNU Make 4.3
 # Built for x86_64-pc-linux-gnu
 # Copyright (C) 1988-2020 Free Software Foundation, Inc.
@@ -8,7 +6,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Jul 17 09:04:01 2022
+# Make data base, printed on Fri Jul 22 15:10:17 2022
 
 # Variables
 
@@ -18,8 +16,6 @@ GDK_BACKEND = x11
 LC_ALL = C
 # environment
 GJS_DEBUG_OUTPUT = stderr
-# environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-39c5e3e9-0e93-45fe-8716-dd8507789f46.sock
 # environment
 VSCODE_CWD = /home/zxx
 # default
@@ -40,12 +36,10 @@ PWD = /home/zxx/桌面/Code/WebMail
 XDG_DATA_DIRS = /usr/share/gnome:/home/zxx/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
-# environment
-VSCODE_LOG_STACK = false
 # automatic
 %F = $(notdir $%)
 # environment
-VSCODE_CODE_CACHE_PATH = /home/zxx/.config/Code/CachedData/30d9c6cd9483b2cc586687151bcbcd635f373630
+VSCODE_CODE_CACHE_PATH = /home/zxx/.config/Code/CachedData/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a
 # environment
 XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session0
 # environment
@@ -60,8 +54,6 @@ XAUTHORITY = /home/zxx/.Xauthority
 MAKEFLAGS = pqrR
 # makefile
 CURDIR := /home/zxx/桌面/Code/WebMail
-# environment
-VSCODE_PIPE_LOGGING = true
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
@@ -81,15 +73,13 @@ MAKEFILE_LIST :=
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_VERBOSE_LOGGING = true
-# environment
-VSCODE_PID = 1795
+VSCODE_PID = 1758
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # environment
-SESSION_MANAGER = local/zxx:@/tmp/.ICE-unix/1205,unix/zxx:/tmp/.ICE-unix/1205
+SESSION_MANAGER = local/zxx:@/tmp/.ICE-unix/1201,unix/zxx:/tmp/.ICE-unix/1201
 # automatic
 *F = $(notdir $*)
 # environment
@@ -101,7 +91,7 @@ DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
 # automatic
 <D = $(patsubst %/,%,$(dir $<))
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"bbca1a7059cee8a1b93da8947fee1c4f.zh-cn","_translationsConfigFile":"/home/zxx/.config/Code/clp/bbca1a7059cee8a1b93da8947fee1c4f.zh-cn/tcf.json","_cacheRoot":"/home/zxx/.config/Code/clp/bbca1a7059cee8a1b93da8947fee1c4f.zh-cn","_resolvedLanguagePackCoreLocation":"/home/zxx/.config/Code/clp/bbca1a7059cee8a1b93da8947fee1c4f.zh-cn/30d9c6cd9483b2cc586687151bcbcd635f373630","_corruptedFile":"/home/zxx/.config/Code/clp/bbca1a7059cee8a1b93da8947fee1c4f.zh-cn/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1d735750dbb1b9066c7513078396ba0f.zh-cn","_translationsConfigFile":"/home/zxx/.config/Code/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn/tcf.json","_cacheRoot":"/home/zxx/.config/Code/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn","_resolvedLanguagePackCoreLocation":"/home/zxx/.config/Code/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn/b06ae3b2d2dbfe28bca3134cc6be65935cdfea6a","_corruptedFile":"/home/zxx/.config/Code/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn/corrupted.info","_languagePackSupport":true}
 # default
 MAKE_HOST := x86_64-pc-linux-gnu
 # environment
@@ -121,15 +111,13 @@ MAKELEVEL := 0
 # default
 MAKE = $(MAKE_COMMAND)
 # environment
-PATH = /usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/sbin:/usr/sbin:/sbin
+PATH = /home/zxx/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/sbin:/usr/sbin:/sbin
 # default
 MAKEFILES := 
 # automatic
 ^F = $(notdir $^)
 # environment
 CINNAMON_VERSION = 5.2.7
-# environment
-VSCODE_LOG_NATIVE = false
 # automatic
 ?F = $(notdir $?)
 # environment
@@ -169,9 +157,9 @@ GTK_MODULES = gail:atk-bridge
 # default
 MAKE_VERSION := 4.3
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 1795
+GIO_LAUNCHED_DESKTOP_FILE_PID = 1758
 # environment
-SSH_AGENT_PID = 1265
+SSH_AGENT_PID = 1261
 # environment
 _ = /usr/share/code/code
 # environment
@@ -191,8 +179,7 @@ QT_IM_MODULE = fcitx
 # environment
 ELECTRON_RUN_AS_NODE = 1
 # environment
-VSCODE_IPC_HOOK = /run/user/1000/vscode-53d49de4-1.68.1-main.sock
- 
+VSCODE_IPC_HOOK = /run/user/1000/vscode-53d49de4-1.69.1-main.sock
 # environment
 XDG_SESSION_ID = 2
 # default
@@ -208,7 +195,7 @@ XDG_GREETER_DATA_DIR = /var/lib/lightdm/data/zxx
 # environment
 GDMSESSION = cinnamon
 # variable set hash-table stats:
-# Load=97/1024=9%, Rehash=0, Collisions=3/124=2%
+# Load=92/1024=9%, Rehash=0, Collisions=2/119=2%
 
 # Pattern-specific Variable Values
 
@@ -268,12 +255,14 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 22 / storage = 186 B / avg = 8 B
-# current buf: size = 8162 B / used = 186 B / count = 22 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 22 / storage = 189 B / avg = 8 B
+# current buf: size = 8162 B / used = 189 B / count = 22 / avg = 8 B
 
 # strcache performance: lookups = 25 / hit rate = 12%
 # hash-table stats:
 # Load=22/8192=0%, Rehash=0, Collisions=0/25=0%
-# Finished Make data base on Sun Jul 17 09:04:01 2022
+# Finished Make data base on Fri Jul 22 15:10:17 2022
 
  
+make: *** No rule to make target 'all'.  Stop.
+
