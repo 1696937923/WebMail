@@ -1,8 +1,0 @@
-syntax = "proto2";
-package MyStruct;
-
-message SESSION{
-    required int32 login_flag = 1;
-    required int32 socket_fd = 2;
-
-}

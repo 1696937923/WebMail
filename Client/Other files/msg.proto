@@ -1,0 +1,16 @@
+syntax = "proto2";
+package MyStruct;
+
+message EMAIL{
+    required string sender = 1;
+    required string receiver = 2;
+    required string subject = 3;
+    required string date = 4;
+    required string content = 5;
+}
+
+message SESSION{
+    required int32 login_flag = 1;
+    required int32 socket_fd = 2;
+}
+

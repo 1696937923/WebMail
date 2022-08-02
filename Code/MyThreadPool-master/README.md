@@ -1,1 +1,0 @@
-使用C++实现的线程池，可以参考[博客](https://blog.csdn.net/woodslay/article/details/124112372)
