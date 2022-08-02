@@ -6,7 +6,7 @@ std::string RSA::Encrypt(std::string plain_text)
     std::string e, n;
     char buffer[1024] = {0};
 
-    FILE *f = fopen("/home/zxx/桌面/Code/WebMail/Crypto/RSA_Public_Key.txt", "r");
+    FILE *f = fopen("./src/RSA_Public_Key.txt", "r");
     if (f == NULL)
     {
         std::cout << "Open RSA_Pulic_Key file error!" << std::endl;
@@ -33,7 +33,12 @@ std::string RSA::Decrypt(std::string secret_text)
     std::string d, n;
     char buffer[1024];
 
-    FILE *f = fopen("/home/zxx/桌面/Code/WebMail/Crypto/RSA_Secret_Key.txt", "r");
+    FILE *f = fopen("./src/RSA_Secret_Key.txt", "r");
+    if (f == NULL)
+    {
+        std::cout << "Open RSA_Secret_Key file error!" << std::endl;
+        return "";
+    }
 
     fgets(buffer, sizeof(buffer), f);
     d = (std::string)buffer;
